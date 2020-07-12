@@ -1,0 +1,31 @@
+{
+  "name": "marvelsidebot",
+  "version": "1.0.0",
+  "description": "A Telegram bot as side project",
+  "main": "bot.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/srajang123/marvelSideBot.git"
+  },
+  "keywords": [
+    "telegram",
+    "bot",
+    "node"
+  ],
+  "author": "Srajan Gupta",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/srajang123/marvelSideBot/issues"
+  },
+  "homepage": "https://github.com/srajang123/marvelSideBot#readme",
+  "dependencies": {
+    "dotenv": "^8.2.0",
+    "mysql2": "^2.1.0",
+    "node-telegram-bot-api": "^0.50.0",
+    "nodemon": "^2.0.4",
+    "telegraf": "^3.38.0"
+  }
+}

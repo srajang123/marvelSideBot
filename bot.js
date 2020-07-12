@@ -3,7 +3,6 @@ require('dotenv').config();
 const db = require('./database');
 
 const bot = new Telegraf(process.env.BOT_TOKEN);
-
 let users = {};
 const newUser = (user) => {
     users[user] = {
@@ -11,11 +10,12 @@ const newUser = (user) => {
         name: '',
         college: '',
         know: '',
-        languages: '',
+        languages: [],
         framework: '',
         projects: false,
         level: 0,
         github: '',
+        algo:0
     }
 }
 bot.command('about', (ctx) => ctx.reply('I am Marvel. I was created by: \nSrajan Gupta\nSakshi Agrawal\nSwati Prajapati'));
@@ -47,6 +47,7 @@ const know = (user, ctx) => {
     users[user].know = ctx.message.text;
     users[user].state++;
     const keyboard = [
+        ['Done'],
         ['Java'],
         ['JavaScript'],
         ['Python'],
@@ -62,12 +63,18 @@ const know = (user, ctx) => {
         ['R'],
         ['Ruby']
     ];
-    ctx.reply('Which programming languages do you know?', { reply_markup: { keyboard, one_time_keyboard: true } });
+    ctx.reply('Which programming languages do you know?', { reply_markup: { keyboard}});
 }
 const languages = (user, ctx) => {
-    users[user].languages = ctx.message.text;
-    users[user].state++;
-    ctx.reply('Do you know any frameworks? Please list them.');
+    if(ctx.message.text!='Done')
+    {
+        users[user].languages.push(ctx.message.text);
+    }
+    else
+    {
+        users[user].state++;
+        ctx.reply('Do you know any frameworks? Please list them.');
+    }
 }
 const framework = (user, ctx) => {
     users[user].framework = ctx.message.text;
@@ -107,14 +114,33 @@ const confident = (user, ctx) => {
 }
 const github = (user, ctx) => {
     users[user].github = ctx.message.text;
-    ctx.reply('Thanks for your response');
     ctx.reply(JSON.stringify(users[user]));
-    save(user);
+    save(user,ctx);
 }
-const save = user => {
-    console.log(users[user]);
+const save = (user,ctx) => {
+    levelAlgo(user);
     const obj = users[user];
-    db.execute('insert into data values(?,?,?,?,?,?,?,?,?)', [user, obj.name, obj.college, obj.know, obj.languages, obj.framework, obj.projects, obj.level, obj.github]);
+    db.execute('insert into data values(?,?,?,?,?,?,?,?,?,?)', [user, obj.name, obj.college, obj.know, JSON.stringify(obj.languages), obj.framework, obj.projects, obj.level, obj.github,obj.algo])
+    .then(res=>{
+        console.log(obj);
+        ctx.reply(`Based on your skills and experience, we feel you should join the SideProjects levelling process at: - Level ${obj.algo}. Please further communicate with SideProjects admin. Happy Coding!`);
+    })
+}
+const levelAlgo=user=>{
+    users[user].framework=users[user].framework=='No'?'':users[user].framework;
+    users[user].algo+=(users[user].languages.length)/3;
+    users[user].algo+=2*users[user].level;
+    users[user].algo+=users[user].framework==''?0:1;
+    let lvl=users[user].algo,lbl=0;
+    if(lvl>=9)
+        lbl=4;
+    else if(lvl<9 && lvl>=6)
+        lbl=3;
+    else if(lvl<6 && lvl>=3)
+        lbl=2;
+    else
+        lbl=1;
+    users[user].algo=lbl;
 }
 bot.on('text', ctx => {
     const user = ctx.from.username;
